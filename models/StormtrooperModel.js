@@ -1,28 +1,45 @@
-function StormtrooperModel(mongo){
-    this.mongo = mongo;
+'use strict'
+function StormtrooperDAO(model){
+    this.model = model;
 };
 
-StormtrooperModel.prototype.find = (query, callback)=>{
-    this.mongo.collection('stormtroopers').find(query, callback);
-};
-StormtrooperModel.prototype.findOne = (_id, callback)=>{
-    var query = {_id: this.mongo.ObjectId(_id)};
-    this.mongo.collection('stormtroopers').findOne(query, callback);
-};
-StormtrooperModel.prototype.create = (data, callback)=>{
-    this.mongo.collection('stormtroopers').insert(data, callback);
+StormtrooperDAO.prototype.create = function(data, callback){
+    var model = new this.model(data);
+    model.save(function(err, result){
+        callback(err, result);
+    });
 };
 
-StormtrooperModel.prototype.update = (_id, data, callback)=>{
-    var query = {_id: this.mongo.ObjectId(_id)};
-    this.mongo.collection('stormtroopers').update(query, data, callback);
+StormtrooperDAO.prototype.find = function(query, callback){
+   this.model.find(query).exec(callback);
 };
 
-StormtrooperModel.prototype.remove = (_id, callback)=>{
-    var query = {_id: this.mongo.ObjectId(_id)};
-    this.mongo.collection('stormtroopers').remove(query, callback);
+StormtrooperDAO.prototype.findOne = function(_id, callback){
+    var query = {_id };
+    this.model.findOne(query).exec(callback);
+};
+
+StormtrooperDAO.prototype.update = function(_id, data, callback){
+    var query = { _id };
+    this.model.update(query, data).exec(function(err, result){
+        callback(err, result);
+    });
+};
+
+StormtrooperDAO.prototype.remove = function(_id, callback){
+    var query = { _id };
+    this.model.remove(query).exec(function(err, result){
+        callback(err, result);
+    });
 };
 
 module.exports = function(mongo){
-    return new StormtrooperModel
+    var Stormtrooper = mongoose.model('Stormtrooper', {
+        name: String,
+        nickname: String,
+        divisions: [String],
+        patent: String
+    });
+
+    return new StormtrooperDAO(Stormtrooper);
 };
